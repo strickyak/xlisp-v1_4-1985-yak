@@ -1,0 +1,8 @@
+/* xlstub.c - stubs for replacing the 'xlobj' module */
+
+#include "xlisp.h"
+
+xloinit() {}
+NODE *xlsend() { return (NIL); }
+NODE *xlobsym() { return (NIL); }
+
