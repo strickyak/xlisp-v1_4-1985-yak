@@ -149,5 +149,5 @@ NODE *xexit(args)
   NODE *args;
 {
     xllastarg(args);
-    exit();
+    exit(0);
 }

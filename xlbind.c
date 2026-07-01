@@ -6,8 +6,7 @@
 extern NODE *xlenv,*xlnewenv;
 
 /* xlsbind - bind a value to a symbol sequentially */
-xlsbind(sym,val)
-  NODE *sym,*val;
+void xlsbind(NODE *sym, NODE *val)
 {
     NODE *ptr;
 
@@ -24,8 +23,7 @@ xlsbind(sym,val)
 }
 
 /* xlbind - bind a value to a symbol in parallel */
-xlbind(sym,val)
-  NODE *sym,*val;
+void xlbind(NODE *sym, NODE *val)
 {
     NODE *ptr;
 
@@ -41,7 +39,7 @@ xlbind(sym,val)
 }
 
 /* xlfixbindings - make a new set of bindings visible */
-xlfixbindings()
+void xlfixbindings(void)
 {
     NODE *eptr,*bnd,*sym,*oldvalue;
 
@@ -57,8 +55,7 @@ xlfixbindings()
 }
 
 /* xlunbind - unbind symbols bound in this environment */
-xlunbind(env)
-  NODE *env;
+void xlunbind(NODE *env)
 {
     NODE *bnd;
 

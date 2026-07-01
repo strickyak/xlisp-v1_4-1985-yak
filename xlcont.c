@@ -12,10 +12,13 @@ extern NODE *true;
 extern NODE *xlxeval();
 
 /* forward declarations */
-FORWARD NODE *let();
-FORWARD NODE *prog();
-FORWARD NODE *progx();
-FORWARD NODE *doloop();
+LOCAL NODE *let(NODE *args, int pflag);
+LOCAL NODE *prog(NODE *args, int pflag);
+LOCAL NODE *progx(NODE *args, int n);
+LOCAL NODE *doloop(NODE *args, int pflag);
+LOCAL void dobindings(NODE *blist, int pflag);
+LOCAL void doupdates(NODE *blist, int pflag);
+LOCAL int  tagblock(NODE *code, NODE **pval);
 
 /* xcond - built-in function 'cond' */
 NODE *xcond(args)
@@ -660,8 +663,7 @@ NODE *xevalhook(args)
 }
 
 /* dobindings - handle bindings for let/let*, prog/prog*, do/do* */
-LOCAL dobindings(blist,pflag)
-  NODE *blist; int pflag;
+LOCAL void dobindings(NODE *blist, int pflag)
 {
     NODE *oldstk,list,bnd,sym,val;
 
@@ -704,8 +706,7 @@ LOCAL dobindings(blist,pflag)
 }
 
 /* doupdates - handle updates for do/do* */
-doupdates(blist,pflag)
-  NODE *blist; int pflag;
+LOCAL void doupdates(NODE *blist, int pflag)
 {
     NODE *oldstk,*oldenv,*oldnewenv,list,bnd,sym,val;
 
@@ -748,8 +749,7 @@ doupdates(blist,pflag)
 }
 
 /* tagblock - execute code within a block and tagbody */
-int tagblock(code,pval)
-  NODE *code,**pval;
+LOCAL int tagblock(NODE *code, NODE **pval)
 {
     NODE *oldstk,arg;
     CONTEXT cntxt;

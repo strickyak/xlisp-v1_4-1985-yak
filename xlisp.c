@@ -12,7 +12,7 @@ extern NODE *s_evalhook,*s_applyhook;
 extern NODE *true;
 
 /* main - the main routine */
-main()
+int main(void)
 /*
 main(argc,argv)
   int argc; char *argv[];
@@ -33,7 +33,7 @@ main(argc,argv)
     xlbegin(&cntxt,CF_ERROR,(NODE *) 1);
     if (setjmp(cntxt.c_jmpbuf)) {
 	printf("fatal initialization error\n");
-	exit();
+	exit(13);
     }
 
     /* initialize xlisp */
@@ -81,8 +81,7 @@ main(argc,argv)
 }
 
 /* stdprint - print to standard output */
-stdprint(expr)
-  NODE *expr;
+void stdprint(NODE *expr)
 {
     xlprint(s_stdout->n_symvalue,expr,TRUE);
     xlterpri(s_stdout->n_symvalue);

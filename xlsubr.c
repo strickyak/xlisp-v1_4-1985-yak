@@ -7,8 +7,7 @@ extern NODE *k_test,*k_tnot,*s_eql;
 extern NODE *xlstack;
 
 /* xlsubr - define a builtin function */
-xlsubr(sname,type,subr)
-  char *sname; int type; NODE *(*subr)();
+void xlsubr(char *sname, int type, NODE *(*subr)())
 {
     NODE *sym;
 
@@ -113,8 +112,7 @@ NODE *xlevmatch(type,pargs)
 }
 
 /* xltest - get the :test or :test-not keyword argument */
-xltest(pfcn,ptresult,pargs)
-  NODE **pfcn; int *ptresult; NODE **pargs;
+void xltest(NODE **pfcn, int *ptresult, NODE **pargs)
 {
     NODE *arg;
 
@@ -155,16 +153,14 @@ xltest(pfcn,ptresult,pargs)
 }
 
 /* xllastarg - make sure the remainder of the argument list is empty */
-xllastarg(args)
-  NODE *args;
+void xllastarg(NODE *args)
 {
     if (args)
 	xlfail("too many arguments");
 }
 
 /* assign - assign a value to a symbol */
-assign(sym,val)
-  NODE *sym,*val;
+void assign(NODE *sym, NODE *val)
 {
     NODE *lptr;
 

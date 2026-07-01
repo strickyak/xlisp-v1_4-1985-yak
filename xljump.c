@@ -9,8 +9,7 @@ extern NODE *xlstack,*xlenv,*xlnewenv;
 extern int xltrace,xldebug;
 
 /* xlbegin - beginning of an execution context */
-xlbegin(cptr,flags,expr)
-  CONTEXT *cptr; int flags; NODE *expr;
+void xlbegin(CONTEXT *cptr, int flags, NODE *expr)
 {
     cptr->c_flags = flags;
     cptr->c_expr = expr;
@@ -23,15 +22,13 @@ xlbegin(cptr,flags,expr)
 }
 
 /* xlend - end of an execution context */
-xlend(cptr)
-  CONTEXT *cptr;
+void xlend(CONTEXT *cptr)
 {
     xlcontext = cptr->c_xlcontext;
 }
 
 /* xljump - jump to a saved execution context */
-xljump(cptr,type,val)
-  CONTEXT *cptr; int type; NODE *val;
+void xljump(CONTEXT *cptr, int type, NODE *val)
 {
     /* restore the state */
     xlvalue = val;
@@ -45,8 +42,7 @@ xljump(cptr,type,val)
 }
 
 /* xlgo - go to a label */
-xlgo(label)
-  NODE *label;
+void xlgo(NODE *label)
 {
     CONTEXT *cptr;
     NODE *p;
@@ -61,8 +57,7 @@ xlgo(label)
 }
 
 /* xlreturn - return from a block */
-xlreturn(val)
-  NODE *val;
+void xlreturn(NODE *val)
 {
     CONTEXT *cptr;
 
@@ -74,8 +69,7 @@ xlreturn(val)
 }
 
 /* xlthrow - throw to a catch */
-xlthrow(tag,val)
-  NODE *tag,*val;
+void xlthrow(NODE *tag, NODE *val)
 {
     CONTEXT *cptr;
 
@@ -87,8 +81,7 @@ xlthrow(tag,val)
 }
 
 /* xlsignal - signal an error */
-xlsignal(emsg,arg)
-  char *emsg; NODE *arg;
+void xlsignal(char *emsg, NODE *arg)
 {
     CONTEXT *cptr;
 

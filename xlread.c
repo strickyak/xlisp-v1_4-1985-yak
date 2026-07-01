@@ -10,13 +10,19 @@ extern NODE *xlstack;
 extern int xlplevel;
 
 /* external routines */
-extern FILE *fopen();
 
 /* forward declarations */
-FORWARD NODE *plist();
-FORWARD NODE *pstring();
-FORWARD NODE *pquote();
-FORWARD NODE *pname();
+LOCAL int   parse(NODE *fptr, NODE **pval);
+LOCAL void  pcomment(NODE *fptr);
+LOCAL NODE *plist(NODE *fptr);
+LOCAL NODE *pstring(NODE *fptr);
+LOCAL NODE *pquote(NODE *fptr, NODE *sym);
+LOCAL NODE *pname(NODE *fptr);
+LOCAL int   nextch(NODE *fptr);
+LOCAL int   checkeof(NODE *fptr);
+LOCAL void  badeof(NODE *fptr);
+LOCAL int   issym(int ch);
+static int  isnumber(char *str, NODE **pval);
 
 /* xlload - load a file of xlisp expressions */
 int xlload(name,vflag,pflag)
@@ -144,8 +150,8 @@ LOCAL int parse(fptr,pval)
 }
 
 /* pcomment - parse a comment */
-LOCAL pcomment(fptr)
-  NODE *fptr;
+/* pcomment - skip over a comment */
+LOCAL void pcomment(NODE *fptr)
 {
     int ch;
 
@@ -353,16 +359,14 @@ LOCAL int checkeof(fptr)
 }
 
 /* badeof - unexpected eof */
-LOCAL badeof(fptr)
-  NODE *fptr;
+LOCAL void badeof(NODE *fptr)
 {
     xlgetc(fptr);
     xlfail("unexpected EOF");
 }
 
 /* isnumber - check if this string is a number */
-int isnumber(str,pval)
-  char *str; NODE **pval;
+static int isnumber(char *str, NODE **pval)
 {
     char *p;
     int d;

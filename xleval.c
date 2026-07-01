@@ -1,8 +1,9 @@
 /* xleval - xlisp evaluator */
 
 #include "xlisp.h"
+#include <stdarg.h>
 
-/* external variables */
+
 extern NODE *xlstack,*xlenv,*xlnewenv;
 extern NODE *s_lambda,*s_macro;
 extern NODE *k_optional,*k_rest,*k_aux;
@@ -11,11 +12,13 @@ extern NODE *s_unbound;
 extern NODE *s_stdout;
 
 /* forward declarations */
-FORWARD NODE *xlxeval();
+extern NODE *xlxeval(NODE* expr);
+
 FORWARD NODE *evalhook();
 FORWARD NODE *evform();
 FORWARD NODE *evsym();
 FORWARD NODE *evfun();
+FORWARD int iskeyword(NODE *sym);
 
 /* xleval - evaluate an xlisp expression (checking for *evalhook*) */
 NODE *xleval(expr)
@@ -209,8 +212,7 @@ LOCAL NODE *evsym(sym)
 }
 
 /* xlunbound - signal an unbound variable error */
-xlunbound(sym)
-  NODE *sym;
+void xlunbound(NODE *sym)
 {
     xlcerror("try evaluating symbol again","unbound variable",sym);
 }
@@ -252,8 +254,7 @@ LOCAL NODE *evfun(fun,args)
 }
 
 /* xlabind - bind the arguments for a function */
-xlabind(fargs,aargs)
-  NODE *fargs,*aargs;
+void xlabind(NODE *fargs, NODE *aargs)
 {
     NODE *arg;
 
@@ -316,27 +317,31 @@ xlabind(fargs,aargs)
 }
 
 /* iskeyword - check to see if a symbol is a keyword */
-LOCAL int iskeyword(sym)
-  NODE *sym;
+LOCAL int iskeyword(NODE *sym)
 {
     return (sym == k_optional || sym == k_rest || sym == k_aux);
 }
 
 /* xlsave - save nodes on the stack */
-NODE *xlsave(n)
-  NODE *n;
+/* Takes a NULL-terminated list of NODE* pointers to push onto xlstack.
+   Uses proper stdarg varargs so the NULL sentinel is pointer-sized on
+   64-bit systems (fixes the K&R fake-varargs crash on LP64). */
+NODE *xlsave(NODE *n, ...)
 {
-    NODE **nptr,*oldstk;
+    va_list ap;
+    NODE *nptr,*oldstk;
 
     /* save the old stack pointer */
     oldstk = xlstack;
 
     /* save each node */
-    for (nptr = &n; *nptr != NULL; nptr++) {
-	rplaca(*nptr,NIL);
-	rplacd(*nptr,xlstack);
-	xlstack = *nptr;
+    va_start(ap, n);
+    for (nptr = n; nptr != NULL; nptr = va_arg(ap, NODE *)) {
+	rplaca(nptr,NIL);
+	rplacd(nptr,xlstack);
+	xlstack = nptr;
     }
+    va_end(ap);
 
     /* return the old stack pointer */
     return (oldstk);

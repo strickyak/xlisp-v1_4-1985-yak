@@ -5,6 +5,12 @@
 /* useful definitions */
 #define ALLOCSIZE (sizeof(struct segment) + (anodes-1) * sizeof(NODE))
 
+/* forward declarations */
+LOCAL void mark(NODE *ptr);
+LOCAL void sweep(void);
+LOCAL int  livecar(NODE *n);
+LOCAL int  livecdr(NODE *n);
+
 /* external variables */
 extern NODE *oblist,*keylist;
 extern NODE *xlstack;
@@ -14,9 +20,7 @@ extern int anodes,nnodes,nsegs,nfree,gccalls;
 extern struct segment *segs;
 extern NODE *fnodes;
 
-/* external procedures */
-extern char *malloc();
-extern char *calloc();
+
 
 /* newnode - allocate a new node */
 NODE *newnode(type)
@@ -76,15 +80,14 @@ char *strsave(str)
 }
 
 /* strfree - free string memory */
-strfree(str)
-  char *str;
+void strfree(char *str)
 {
     total -= (long) (strlen(str)+1);
     free(str);
 }
 
 /* gc - garbage collect */
-gc()
+void gc(void)
 {
     NODE *p;
 
@@ -109,8 +112,7 @@ gc()
 }
 
 /* mark - mark all accessible nodes */
-LOCAL mark(ptr)
-  NODE *ptr;
+LOCAL void mark(NODE *ptr)
 {
     NODE *this,*prev,*tmp;
 
@@ -196,7 +198,7 @@ LOCAL mark(ptr)
 }
 
 /* sweep - sweep all unmarked nodes and add them to the free list */
-LOCAL sweep()
+LOCAL void sweep(void)
 {
     struct segment *seg;
     NODE *p;
@@ -273,8 +275,7 @@ int addseg()
 }
  
 /* livecar - do we need to follow the car? */
-LOCAL int livecar(n)
-  NODE *n;
+LOCAL int livecar(NODE *n)
 {
     switch (ntype(n)) {
     case SUBR:
@@ -289,13 +290,12 @@ LOCAL int livecar(n)
 	    return (car(n) != NIL);
     default:
 	    printf("bad node type (%d) found during left scan\n",ntype(n));
-	    exit();
+	    exit(13);
     }
 }
 
 /* livecdr - do we need to follow the cdr? */
-LOCAL int livecdr(n)
-  NODE *n;
+LOCAL int livecdr(NODE *n)
 {
     switch (ntype(n)) {
     case SUBR:
@@ -310,12 +310,12 @@ LOCAL int livecdr(n)
 	    return (cdr(n) != NIL);
     default:
 	    printf("bad node type (%d) found during right scan\n",ntype(n));
-	    exit();
+	    exit(13);
     }
 }
 
 /* stats - print memory statistics */
-stats()
+void stats(void)
 {
     printf("Nodes:       %d\n",nnodes);
     printf("Free nodes:  %d\n",nfree);
@@ -326,7 +326,7 @@ stats()
 }
 
 /* xlminit - initialize the dynamic memory module */
-xlminit()
+void xlminit(void)
 {
     /* initialize our internal variables */
     anodes = NNODES;

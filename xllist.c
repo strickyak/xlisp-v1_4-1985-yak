@@ -12,13 +12,20 @@ extern NODE *s_unbound;
 extern NODE *true;
 
 /* external routines */
-extern int eq(),eql(),equal();
+extern int eq(NODE *arg1, NODE *arg2);
+extern int eql(NODE *arg1, NODE *arg2);
+extern int equal(NODE *arg1, NODE *arg2);
+extern void xltest(NODE **pfcn, int *ptresult, NODE **pargs);
 
 /* forward declarations */
-FORWARD NODE *cxr();
-FORWARD NODE *nth(),*assoc();
-FORWARD NODE *subst(),*sublis(),*map();
-FORWARD NODE *cequal();
+LOCAL NODE *cxr(NODE *args, char *adstr);
+LOCAL NODE *nth(NODE *args, int cdrflag);
+LOCAL NODE *assoc(NODE *expr, NODE *alist, NODE *fcn, int tresult);
+LOCAL NODE *subst(NODE *to, NODE *from, NODE *expr, NODE *fcn, int tresult);
+LOCAL NODE *sublis(NODE *alist, NODE *expr, NODE *fcn, int tresult);
+LOCAL NODE *map(NODE *args, int carflag, int valflag);
+LOCAL NODE *cequal(NODE *args, int (*fcn)(NODE *,NODE *));
+static int  dotest(NODE *arg1, NODE *arg2, NODE *fcn);
 
 /* xcar - return the car of a list */
 NODE *xcar(args)
@@ -444,8 +451,7 @@ NODE *xremove(args)
 }
 
 /* dotest - call a test function */
-int dotest(arg1,arg2,fcn)
-  NODE *arg1,*arg2,*fcn;
+static int dotest(NODE *arg1, NODE *arg2, NODE *fcn)
 {
     NODE *oldstk,args,*val;
 
@@ -836,8 +842,7 @@ NODE *xequal(args)
 }
 
 /* cequal - common eq/eql/equal function */
-LOCAL NODE *cequal(args,fcn)
-  NODE *args; int (*fcn)();
+LOCAL NODE *cequal(NODE *args, int (*fcn)(NODE *,NODE *))
 {
     NODE *arg1,*arg2;
 

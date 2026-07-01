@@ -6,9 +6,15 @@
 extern NODE *xlstack;
 extern char buf[];
 
+/* forward declarations */
+LOCAL void putstring(NODE *fptr, char *str);
+LOCAL void putatm(NODE *fptr, char *tag, NODE *val);
+LOCAL void putdec(NODE *fptr, int n);
+LOCAL void putoct(NODE *fptr, int n);
+LOCAL void putstr(NODE *fptr, char *str);
+
 /* xlprint - print an xlisp value */
-xlprint(fptr,vptr,flag)
-  NODE *fptr,*vptr; int flag;
+void xlprint(NODE *fptr, NODE *vptr, int flag)
 {
     NODE *nptr,*next;
 
@@ -69,15 +75,13 @@ xlprint(fptr,vptr,flag)
 }
 
 /* xlterpri - terminate the current print line */
-xlterpri(fptr)
-  NODE *fptr;
+void xlterpri(NODE *fptr)
 {
     xlputc(fptr,'\n');
 }
 
 /* putstring - output a string */
-LOCAL putstring(fptr,str)
-  NODE *fptr; char *str;
+LOCAL void putstring(NODE *fptr, char *str)
 {
     int ch;
 
@@ -121,8 +125,7 @@ LOCAL putstring(fptr,str)
 }
 
 /* putatm - output an atom */
-LOCAL putatm(fptr,tag,val)
-  NODE *fptr; char *tag; NODE *val;
+LOCAL void putatm(NODE *fptr, char *tag, NODE *val)
 {
     sprintf(buf,"#<%s: #",tag); putstr(fptr,buf);
     sprintf(buf,AFMT,val); putstr(fptr,buf);
@@ -130,24 +133,21 @@ LOCAL putatm(fptr,tag,val)
 }
 
 /* putdec - output a decimal number */
-LOCAL putdec(fptr,n)
-  NODE *fptr; int n;
+LOCAL void putdec(NODE *fptr, int n)
 {
     sprintf(buf,"%d",n);
     putstr(fptr,buf);
 }
 
 /* putoct - output an octal byte value */
-LOCAL putoct(fptr,n)
-  NODE *fptr; int n;
+LOCAL void putoct(NODE *fptr, int n)
 {
     sprintf(buf,"%03o",n);
     putstr(fptr,buf);
 }
 
 /* putstr - output a string */
-LOCAL putstr(fptr,str)
-  NODE *fptr; char *str;
+LOCAL void putstr(NODE *fptr, char *str)
 {
     while (*str)
 	xlputc(fptr,*str++);

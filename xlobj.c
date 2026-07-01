@@ -31,15 +31,31 @@ extern int varcnt;
 /* number of instance variables for the class 'Class' */
 #define CLASSSIZE	7
 
-/* forward declarations */
-FORWARD NODE *xlgetivar();
-FORWARD NODE *xlsetivar();
-FORWARD NODE *xlivar();
-FORWARD NODE *xlcvar();
-FORWARD NODE *findmsg();
-FORWARD NODE *findvar();
-FORWARD NODE *defvars();
-FORWARD NODE *makelist();
+/* forward declarations - LOCAL functions */
+LOCAL NODE *mnew(void);
+LOCAL NODE *misnew(NODE *args);
+LOCAL NODE *entermsg(NODE *cls, NODE *msg);
+LOCAL NODE *answer(NODE *args);
+LOCAL NODE *mivars(NODE *args);
+LOCAL int   getivcnt(NODE *cls, int ivar);
+LOCAL NODE *mcvars(NODE *args);
+LOCAL NODE *defvars(NODE *args, int varnum);
+LOCAL NODE *getclass(NODE *args);
+LOCAL NODE *obshow(NODE *args);
+LOCAL NODE *defisnew(NODE *args);
+LOCAL NODE *sendsuper(NODE *args);
+LOCAL NODE *findmsg(NODE *cls, NODE *sym);
+LOCAL NODE *findvar(NODE *obj, NODE *sym);
+LOCAL int   checkvar(NODE *cls, NODE *sym);
+LOCAL NODE *makelist(int cnt);
+
+/* external non-LOCAL functions defined later in this file */
+extern NODE *xlgetivar(NODE *obj, int num);
+extern NODE *xlsetivar(NODE *obj, int num, NODE *val);
+extern NODE *xlivar(NODE *obj, int num);
+extern NODE *xlcvar(NODE *cls, int num);
+extern NODE *xlxsend(NODE *obj, NODE *msg, NODE *args);
+extern void  xladdmsg(NODE *cls, char *msg, NODE *(*code)());
 
 /* xlclass - define a class */
 NODE *xlclass(name,vcnt)
@@ -212,8 +228,7 @@ LOCAL NODE *misnew(args)
 }
 
 /* xladdivar - enter an instance variable */
-xladdivar(cls,var)
-  NODE *cls; char *var;
+void xladdivar(NODE *cls, char *var)
 {
     NODE *ivar,*lptr;
 
@@ -314,8 +329,7 @@ LOCAL NODE *mivars(args)
 }
 
 /* getivcnt - get the number of instance variables for a class */
-LOCAL int getivcnt(cls,ivar)
-  NODE *cls; int ivar;
+LOCAL int getivcnt(NODE *cls, int ivar)
 {
     NODE *cnt;
 
@@ -393,8 +407,7 @@ LOCAL NODE *defvars(args,varnum)
 }
 
 /* xladdmsg - add a message to a class */
-xladdmsg(cls,msg,code)
-  NODE *cls; char *msg; NODE *(*code)();
+void xladdmsg(NODE *cls, char *msg, NODE *(*code)())
 {
     NODE *mptr;
 
@@ -577,23 +590,20 @@ LOCAL int checkvar(cls,sym)
 }
 
 /* xlgetivar - get the value of an instance variable */
-NODE *xlgetivar(obj,num)
-  NODE *obj; int num;
+NODE *xlgetivar(NODE *obj, int num)
 {
     return (car(xlivar(obj,num)));
 }
 
 /* xlsetivar - set the value of an instance variable */
-NODE *xlsetivar(obj,num,val)
-  NODE *obj; int num; NODE *val;
+NODE *xlsetivar(NODE *obj, int num, NODE *val)
 {
     rplaca(xlivar(obj,num),val);
     return (val);
 }
 
 /* xlivar - get an instance variable */
-NODE *xlivar(obj,num)
-  NODE *obj; int num;
+NODE *xlivar(NODE *obj, int num)
 {
     NODE *ivar;
 
@@ -609,8 +619,7 @@ NODE *xlivar(obj,num)
 }
 
 /* xlcvar - get a class variable */
-NODE *xlcvar(cls,num)
-  NODE *cls; int num;
+NODE *xlcvar(NODE *cls, int num)
 {
     NODE *cvar;
 
@@ -626,8 +635,7 @@ NODE *xlcvar(cls,num)
 }
 
 /* makelist - make a list of nodes */
-LOCAL NODE *makelist(cnt)
-  int cnt;
+LOCAL NODE *makelist(int cnt)
 {
     NODE *oldstk,list,*lnew;
 
@@ -649,7 +657,7 @@ LOCAL NODE *makelist(cnt)
 }
 
 /* xloinit - object function initialization routine */
-xloinit()
+void xloinit(void)
 {
     /* don't confuse the garbage collector */
     class = object = NIL;

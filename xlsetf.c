@@ -6,6 +6,9 @@
 extern NODE *s_car,*s_cdr,*s_get,*s_svalue,*s_splist;
 extern NODE *xlstack;
 
+/* forward declarations */
+LOCAL void placeform(NODE *place, NODE *value);
+
 /* xsetf - built-in function 'setf' */
 NODE *xsetf(args)
   NODE *args;
@@ -42,8 +45,7 @@ NODE *xsetf(args)
 }
 
 /* placeform - handle a place form other than a symbol */
-LOCAL placeform(place,value)
-  NODE *place,*value;
+LOCAL void placeform(NODE *place, NODE *value)
 {
     NODE *fun,*oldstk,arg1,arg2;
 

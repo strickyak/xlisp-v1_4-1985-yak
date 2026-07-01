@@ -9,12 +9,10 @@ extern NODE *xlstack;
 
 /* forward declarations */
 FORWARD NODE *symenter();
-FORWARD NODE *xlmakesym();
 FORWARD NODE *findprop();
 
 /* xlenter - enter a symbol into the oblist or keylist */
-NODE *xlenter(name,type)
-  char *name;
+NODE *xlenter(char *name, int type)
 {
     return (symenter(name,type,(*name == ':' ? keylist : oblist)));
 }
@@ -67,8 +65,7 @@ NODE *xlsenter(name)
 }
 
 /* xlmakesym - make a new symbol node */
-NODE *xlmakesym(name,type)
-  char *name;
+NODE *xlmakesym(char *name, int type)
 {
     NODE *oldstk,sym,*str;
 
@@ -107,8 +104,7 @@ NODE *xlgetprop(sym,prp)
 }
 
 /* xlputprop - put a property value onto the property list */
-xlputprop(sym,val,prp)
-  NODE *sym,*val,*prp;
+void xlputprop(NODE *sym, NODE *val, NODE *prp)
 {
     NODE *oldstk,p,*pair;
 
@@ -126,8 +122,7 @@ xlputprop(sym,val,prp)
 }
 
 /* xlremprop - remove a property from a property list */
-xlremprop(sym,prp)
-  NODE *sym,*prp;
+void xlremprop(NODE *sym, NODE *prp)
 {
     NODE *last,*p;
 
@@ -155,7 +150,7 @@ LOCAL NODE *findprop(sym,prp)
 }
 
 /* xlsinit - symbol initialization routine */
-xlsinit()
+void xlsinit(void)
 {
     /* initialize the oblist */
     oblist = xlmakesym("*oblist*",STATIC);

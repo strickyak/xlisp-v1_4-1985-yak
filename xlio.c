@@ -109,8 +109,7 @@ int xlpeek(fptr)
 }
 
 /* xlputc - put a character to a file or stream */
-xlputc(fptr,ch)
-  NODE *fptr; int ch;
+void xlputc(NODE *fptr, int ch)
 {
     NODE *oldstk,lptr;
 
@@ -141,7 +140,7 @@ xlputc(fptr,ch)
 }
 
 /* xlflush - flush the input buffer */
-int xlflush()
+void xlflush(void)
 {
     if (!prompt)
 	while (xlgetc(s_stdin->n_symvalue) != '\n')

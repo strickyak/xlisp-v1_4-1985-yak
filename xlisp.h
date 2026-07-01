@@ -20,6 +20,9 @@
 #include <stdio.h>
 #include <setjmp.h>
 #include <ctype.h>
+#include <string.h>
+#include <stdlib.h>
+#include <stdarg.h>
 #endif
 
 /* NNODES       number of nodes to allocate in each request */
@@ -103,7 +106,7 @@
 #define LOCAL           static
 #endif
 #ifndef AFMT
-#define AFMT            "%x"
+#define AFMT            "%p"
 #endif
 #ifndef TSTKSIZE
 #define TSTKSIZE        (sizeof(NODE *) * TDEPTH)
@@ -247,25 +250,79 @@ struct segment {
 };
 
 /* external procedure declarations */
-extern struct node *xleval();           /* evaluate an expression */
-extern struct node *xlapply();          /* apply a function to arguments */
-extern struct node *xlevlist();         /* evaluate a list of arguments */
-extern struct node *xlarg();            /* fetch an argument */
-extern struct node *xlevarg();          /* fetch and evaluate an argument */
-extern struct node *xlmatch();          /* fetch an typed argument */
-extern struct node *xlevmatch();        /* fetch and evaluate a typed arg */
-extern struct node *xlsend();           /* send a message to an object */
-extern struct node *xlenter();          /* enter a symbol */
-extern struct node *xlsenter();         /* enter a symbol with a static pname */
-extern struct node *xlintern();         /* intern a symbol */
-extern struct node *xlmakesym();        /* make an uninterned symbol */
-extern struct node *xlsave();           /* generate a stack frame */
-extern struct node *xlobsym();          /* find an object's class or instance
-                                           variable */
-extern struct node *xlgetprop();        /* get the value of a property */
-extern char *xlsymname();               /* get the print name of a symbol */
+extern struct node *xleval(struct node *expr);
+extern struct node *xlapply(struct node *fun, struct node *args);
+extern struct node *xlevlist(struct node *args);
+extern struct node *xlarg(struct node **pargs);
+extern struct node *xlevarg(struct node **pargs);
+extern struct node *xlmatch(int type, struct node **pargs);
+extern struct node *xlevmatch(int type, struct node **pargs);
+extern struct node *xlsend(struct node *obj, struct node *args);
+extern struct node *xlenter(char *name, int type);
+extern struct node *xlsenter(char *name);
+extern struct node *xlintern(char *name, int type);
+extern struct node *xlmakesym(char *name, int type);
+extern struct node *xlsave(struct node *n, ...); /* generate a stack frame (NULL-terminated) */
+extern struct node *xlobsym(struct node *sym);
+extern struct node *xlgetprop(struct node *sym, struct node *prp);
+extern char        *xlsymname(struct node *sym);
 
-extern struct node *newnode();          /* allocate a new node */
-extern char *stralloc();                /* allocate string space */
-extern char *strsave();                 /* make a safe copy of a string */
+extern struct node *newnode(int type);
+extern char        *stralloc(int size);
+extern char        *strsave(char *str);
 
+/* void-returning internal routines */
+extern void xlinit(void);
+extern void xlminit(void);
+extern void xlsinit(void);
+extern void xldinit(void);
+extern void xloinit(void);
+extern void xlsubr(char *sname, int type, struct node *(*subr)());
+extern void xlfail(char *emsg);
+extern void xlabort(char *emsg);
+extern void xlbreak(char *emsg, struct node *arg);
+extern void xlerror(char *emsg, struct node *arg);
+extern void xlcerror(char *cmsg, char *emsg, struct node *arg);
+extern void xlerrprint(char *hdr, char *cmsg, char *emsg, struct node *arg);
+extern void xlsignal(char *emsg, struct node *arg);
+extern void xltpush(struct node *nptr);
+extern void xltpop(void);
+extern void xlbaktrace(int n);
+extern void xlbegin(CONTEXT *cptr, int flags, struct node *expr);
+extern void xlend(CONTEXT *cptr);
+extern void xlgo(struct node *label);
+extern void xlreturn(struct node *val);
+extern void xlthrow(struct node *tag, struct node *val);
+extern void xlunbind(struct node *env);
+extern void xlsbind(struct node *sym, struct node *val);
+extern void xlabind(struct node *fargs, struct node *aargs);
+extern void xlfixbindings(void);
+extern void xlbind(struct node *sym, struct node *val);
+extern void xlunbound(struct node *sym);
+extern void xlputprop(struct node *sym, struct node *val, struct node *prp);
+extern void xlremprop(struct node *sym, struct node *prp);
+extern void xlprint(struct node *fptr, struct node *vptr, int flag);
+extern void xlterpri(struct node *fptr);
+extern void xlputc(struct node *fptr, int ch);
+extern int  xlgetc(struct node *fptr);
+extern int  xlpeek(struct node *fptr);
+extern void xlflush(void);
+extern int  xlread(struct node *fptr, struct node **pval);
+extern int  xlload(char *name, int vflag, int pflag);
+extern void stdprint(struct node *expr);
+extern void xllastarg(struct node *args);
+extern void assign(struct node *sym, struct node *val);
+extern void gc(void);
+extern int  addseg(void);
+extern void stats(void);
+extern void strfree(char *str);
+
+/* xlobj.c public functions */
+extern struct node *xlgetivar(struct node *obj, int num);
+extern struct node *xlsetivar(struct node *obj, int num, struct node *val);
+extern struct node *xlivar(struct node *obj, int num);
+extern struct node *xlcvar(struct node *cls, int num);
+extern struct node *xlxsend(struct node *obj, struct node *msg, struct node *args);
+extern struct node *xlsend(struct node *obj, struct node *args);
+extern void         xladdmsg(struct node *cls, char *msg, struct node *(*code)());
+extern struct node *xlclass(char *name, int vcnt);

@@ -14,50 +14,45 @@ extern NODE *xlstack;
 extern NODE *true;
 extern NODE **trace_stack;
 
-/* external routines */
-extern char *malloc();
-
 /* forward declarations */
-FORWARD NODE *stacktop();
+LOCAL NODE *stacktop(void);
+LOCAL void doerror(char *cmsg, char *emsg, NODE *arg, int cflag);
+LOCAL int  breakloop(char *hdr, char *cmsg, char *emsg, NODE *arg, int cflag);
+
+
 
 /* xlfail - xlisp error handler */
-xlfail(emsg)
-  char *emsg;
+void xlfail(char *emsg)
 {
     xlerror(emsg,stacktop());
 }
 
 /* xlabort - xlisp serious error handler */
-xlabort(emsg)
-  char *emsg;
+void xlabort(char *emsg)
 {
     xlsignal(emsg,s_unbound);
 }
 
 /* xlbreak - enter a break loop */
-xlbreak(emsg,arg)
-  char *emsg; NODE *arg;
+void xlbreak(char *emsg, NODE *arg)
 {
     breakloop("break",NULL,emsg,arg,TRUE);
 }
 
 /* xlerror - handle a fatal error */
-xlerror(emsg,arg)
-  char *emsg; NODE *arg;
+void xlerror(char *emsg, NODE *arg)
 {
     doerror(NULL,emsg,arg,FALSE);
 }
 
 /* xlcerror - handle a recoverable error */
-xlcerror(cmsg,emsg,arg)
-  char *cmsg,*emsg; NODE *arg;
+void xlcerror(char *cmsg, char *emsg, NODE *arg)
 {
     doerror(cmsg,emsg,arg,TRUE);
 }
 
 /* xlerrprint - print an error message */
-xlerrprint(hdr,cmsg,emsg,arg)
-  char *hdr,*cmsg,*emsg; NODE *arg;
+void xlerrprint(char *hdr, char *cmsg, char *emsg, NODE *arg)
 {
     printf("%s: %s",hdr,emsg);
     if (arg != s_unbound) { printf(" - "); stdprint(arg); }
@@ -66,8 +61,7 @@ xlerrprint(hdr,cmsg,emsg,arg)
 }
 
 /* doerror - handle xlisp errors */
-LOCAL doerror(cmsg,emsg,arg,cflag)
-  char *cmsg,*emsg; NODE *arg; int cflag;
+LOCAL void doerror(char *cmsg, char *emsg, NODE *arg, int cflag)
 {
     /* make sure the break loop is enabled */
     if (s_breakenable->n_symvalue == NIL)
@@ -147,15 +141,14 @@ LOCAL int breakloop(hdr,cmsg,emsg,arg,cflag)
 }
 
 /* tpush - add an entry to the trace stack */
-xltpush(nptr)
-    NODE *nptr;
+void xltpush(NODE *nptr)
 {
     if (++xltrace < TDEPTH)
 	trace_stack[xltrace] = nptr;
 }
 
 /* tpop - pop an entry from the trace stack */
-xltpop()
+void xltpop(void)
 {
     xltrace--;
 }
@@ -167,8 +160,7 @@ LOCAL NODE *stacktop()
 }
 
 /* baktrace - do a back trace */
-xlbaktrace(n)
-  int n;
+void xlbaktrace(int n)
 {
     int i;
 
@@ -178,7 +170,7 @@ xlbaktrace(n)
 }
 
 /* xldinit - debug initialization routine */
-xldinit()
+void xldinit(void)
 {
     if ((trace_stack = (NODE **) malloc(TSTKSIZE)) == NULL)
 	xlabort("insufficient memory");

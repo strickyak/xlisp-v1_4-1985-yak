@@ -10,29 +10,13 @@ OBJS=	xlbfun.o xlbind.o xlcont.o xldbug.o xldmem.o xleval.o xlfio.o \
 MISC=	Makefile fact.lsp init.lsp object.lsp prolog.lsp trace.lsp \
 	xlstub.c.NOTUSED 
 
-CFLAGS=	-O
+# CFLAGS=	-g -D'FORWARD=extern' -D'LOCAL='
+CFLAGS=	-g -D'FORWARD=static' -D'LOCAL=static'
 
 xlisp: $(OBJS)
 	cc -o xlisp $(CFLAGS) $(OBJS)
 
 $(OBJS): xlisp.h
 
-rcs: $(SRCS)
-	rcs -l $?
-	touch rcs
-
-lint:
-	lint -ach $(SRCS)
-
-new: clean
-	rm -f xlisp
-	make xlisp
-
 clean:
-	rm -f *.o
-
-shar: $(SRCS) $(MISC)
-	shar -c -v xlisp.doc > xlisp1.shar
-	shar -c -v $(SRC1) > xlisp2.shar
-	shar -c -v $(SRC2) > xlisp3.shar
-	shar -c -v $(SRC3) $(MISC) > xlisp4.shar
+	rm -f *.o xlisp

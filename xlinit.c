@@ -17,7 +17,7 @@ extern NODE *a_list,*a_sym,*a_int,*a_str,*a_obj,*a_fptr;
 extern struct fdef ftab[];
 
 /* xlinit - xlisp initialization routine */
-xlinit()
+void xlinit(void)
 {
     struct fdef *fptr;
     NODE *sym;
