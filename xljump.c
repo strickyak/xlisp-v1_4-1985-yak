@@ -5,92 +5,80 @@
 /* external variables */
 extern CONTEXT *xlcontext;
 extern NODE *xlvalue;
-extern NODE *xlstack,*xlenv,*xlnewenv;
-extern int xltrace,xldebug;
+extern NODE *xlstack, *xlenv, *xlnewenv;
+extern int xltrace, xldebug;
 
 /* xlbegin - beginning of an execution context */
-void xlbegin(CONTEXT *cptr, int flags, NODE *expr)
-{
-    cptr->c_flags = flags;
-    cptr->c_expr = expr;
-    cptr->c_xlstack = xlstack;
-    cptr->c_xlenv = xlenv;
-    cptr->c_xlnewenv = xlnewenv;
-    cptr->c_xltrace = xltrace;
-    cptr->c_xlcontext = xlcontext;
-    xlcontext = cptr;
+void xlbegin(CONTEXT *cptr, int flags, NODE *expr) {
+  cptr->c_flags = flags;
+  cptr->c_expr = expr;
+  cptr->c_xlstack = xlstack;
+  cptr->c_xlenv = xlenv;
+  cptr->c_xlnewenv = xlnewenv;
+  cptr->c_xltrace = xltrace;
+  cptr->c_xlcontext = xlcontext;
+  xlcontext = cptr;
 }
 
 /* xlend - end of an execution context */
-void xlend(CONTEXT *cptr)
-{
-    xlcontext = cptr->c_xlcontext;
-}
+void xlend(CONTEXT *cptr) { xlcontext = cptr->c_xlcontext; }
 
 /* xljump - jump to a saved execution context */
-void xljump(CONTEXT *cptr, int type, NODE *val)
-{
-    /* restore the state */
-    xlvalue = val;
-    xlstack = cptr->c_xlstack;
-    xlunbind(cptr->c_xlenv);
-    xlnewenv = cptr->c_xlnewenv;
-    xltrace = cptr->c_xltrace;
+void xljump(CONTEXT *cptr, int type, NODE *val) {
+  /* restore the state */
+  xlvalue = val;
+  xlstack = cptr->c_xlstack;
+  xlunbind(cptr->c_xlenv);
+  xlnewenv = cptr->c_xlnewenv;
+  xltrace = cptr->c_xltrace;
 
-    /* call the handler */
-    longjmp(cptr->c_jmpbuf,type);
+  /* call the handler */
+  longjmp(cptr->c_jmpbuf, type);
 }
 
 /* xlgo - go to a label */
-void xlgo(NODE *label)
-{
-    CONTEXT *cptr;
-    NODE *p;
+void xlgo(NODE *label) {
+  CONTEXT *cptr;
+  NODE *p;
 
-    /* find a tagbody context */
-    for (cptr = xlcontext; cptr; cptr = cptr->c_xlcontext)
-	if (cptr->c_flags & CF_GO)
-	    for (p = cptr->c_expr; consp(p); p = cdr(p))
-		if (car(p) == label)
-		    xljump(cptr,CF_GO,p);
-    xlfail("no target for go");
+  /* find a tagbody context */
+  for (cptr = xlcontext; cptr; cptr = cptr->c_xlcontext)
+    if (cptr->c_flags & CF_GO)
+      for (p = cptr->c_expr; consp(p); p = cdr(p))
+        if (car(p) == label) xljump(cptr, CF_GO, p);
+  xlfail("no target for go");
 }
 
 /* xlreturn - return from a block */
-void xlreturn(NODE *val)
-{
-    CONTEXT *cptr;
+void xlreturn(NODE *val) {
+  CONTEXT *cptr;
 
-    /* find a block context */
-    for (cptr = xlcontext; cptr; cptr = cptr->c_xlcontext)
-	if (cptr->c_flags & CF_RETURN)
-	    xljump(cptr,CF_RETURN,val);
-    xlfail("no target for return");
+  /* find a block context */
+  for (cptr = xlcontext; cptr; cptr = cptr->c_xlcontext)
+    if (cptr->c_flags & CF_RETURN) xljump(cptr, CF_RETURN, val);
+  xlfail("no target for return");
 }
 
 /* xlthrow - throw to a catch */
-void xlthrow(NODE *tag, NODE *val)
-{
-    CONTEXT *cptr;
+void xlthrow(NODE *tag, NODE *val) {
+  CONTEXT *cptr;
 
-    /* find a catch context */
-    for (cptr = xlcontext; cptr; cptr = cptr->c_xlcontext)
-	if ((cptr->c_flags & CF_THROW) && cptr->c_expr == tag)
-	    xljump(cptr,CF_THROW,val);
-    xlfail("no target for throw");
+  /* find a catch context */
+  for (cptr = xlcontext; cptr; cptr = cptr->c_xlcontext)
+    if ((cptr->c_flags & CF_THROW) && cptr->c_expr == tag)
+      xljump(cptr, CF_THROW, val);
+  xlfail("no target for throw");
 }
 
 /* xlsignal - signal an error */
-void xlsignal(char *emsg, NODE *arg)
-{
-    CONTEXT *cptr;
+void xlsignal(char *emsg, NODE *arg) {
+  CONTEXT *cptr;
 
-    /* find an error catcher */
-    for (cptr = xlcontext; cptr; cptr = cptr->c_xlcontext)
-	if (cptr->c_flags & CF_ERROR) {
-	    if (cptr->c_expr)
-		xlerrprint("error",NULL,emsg,arg);
-	    xljump(cptr,CF_ERROR,NIL);
-	}
-    xlfail("no target for error");
+  /* find an error catcher */
+  for (cptr = xlcontext; cptr; cptr = cptr->c_xlcontext)
+    if (cptr->c_flags & CF_ERROR) {
+      if (cptr->c_expr) xlerrprint("error", NULL, emsg, arg);
+      xljump(cptr, CF_ERROR, NIL);
+    }
+  xlfail("no target for error");
 }
